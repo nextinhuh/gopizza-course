@@ -8,7 +8,7 @@ import { AuthProvider } from '@hooks/auth';
 
 import theme from './src/theme';
 
-import { SingIn } from '@screens/SingIn';
+import { Product } from '@screens/Product';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -25,7 +25,7 @@ export default function App() {
       <StatusBar style='light' translucent backgroundColor='transparent' />
 
       <AuthProvider>
-        <SingIn />
+        <Product />
       </AuthProvider>
     </ThemeProvider>
   );
