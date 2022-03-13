@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, TouchableOpacity } from 'react-native';
 import { useTheme } from 'styled-components/native';
 import { MaterialIcons } from '@expo/vector-icons';
 import firestore from '@react-native-firebase/firestore';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 
 import happyEmoji from "@assets/happy.png";
 
@@ -17,14 +18,17 @@ import {
     GreetingText,
     Title,
     MenuHeader,
-    MenuItemsNumber
+    MenuItemsNumber,
+    NewProductButton
 } from './styles';
 import { FlatList } from 'react-native-gesture-handler';
 
 export function Home() {
     const [pizzas, setPizzas] = useState<ProductProps[]>([]);
     const [search, setSearch] = useState('');
+
     const { COLORS } = useTheme();
+    const navigation = useNavigation();
 
     function fetchPizzas(value: string) {
         const formattedValue = value.toLocaleLowerCase().trim();
@@ -43,7 +47,6 @@ export function Home() {
                     }
                 }) as ProductProps[];
 
-                console.log(data);
                 setPizzas(data);
             })
             .catch(() => Alert.alert('Consulta', 'Não foi possível realizar a consulta.'))
@@ -58,9 +61,18 @@ export function Home() {
         fetchPizzas('');
     }
 
-    useEffect(() => {
-        fetchPizzas('');
-    }, [])
+    function handleOpen(id: string) {
+        navigation.navigate('product', { id });
+    }
+    function handleAdd() {
+        navigation.navigate('product', {});
+    }
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchPizzas('');
+        }, [])
+    );
 
     return (
         <Container>
@@ -85,13 +97,18 @@ export function Home() {
 
             <MenuHeader>
                 <Title>Cardápio</Title>
-                <MenuItemsNumber>10 pizzas</MenuItemsNumber>
+                <MenuItemsNumber>{pizzas.length} pizzas</MenuItemsNumber>
             </MenuHeader>
 
             <FlatList
                 data={pizzas}
                 keyExtractor={item => item.id}
-                renderItem={({ item }) => <ProductCard data={item} />}
+                renderItem={({ item }) => (
+                    <ProductCard
+                        data={item}
+                        onPress={() => handleOpen(item.id)}
+                    />
+                )}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{
                     paddingTop: 20,
@@ -100,8 +117,11 @@ export function Home() {
                 }}
             />
 
-
-
+            <NewProductButton
+                title='Cadastrar Pizza'
+                type='secondary'
+                onPress={handleAdd}
+            />
         </Container>
     );
 }
